@@ -20,11 +20,11 @@ def err(s: str) -> None:
 #  - unlike plain grep, which is slower and has different flags on MacOS versus
 #    Linux, git grep is always the same.
 res = subprocess.run(
-    ["git", "grep", "-Hn", "--no-index", "DO NOT SUBMIT", *sys.argv[1:]],
+    ["git", "grep", "-Hn", "--no-index", "--ignore-case", "-E", "(DO NOT |NO *)commit", *sys.argv[1:]],
     capture_output=True,
 )
 if res.returncode == 0:
-    err('Error: The string "DO NOT SUBMIT" was found!')
+    err('Error: A disallowed string was found!')
     err(res.stdout.decode("utf-8"))
     sys.exit(1)
 elif res.returncode == 2:
@@ -32,15 +32,3 @@ elif res.returncode == 2:
     err(res.stderr.decode("utf-8"))
     sys.exit(2)
 
-res = subprocess.run(
-    ["git", "grep", "-Hn", "--no-index", "DO NOT COMMIT", *sys.argv[1:]],
-    capture_output=True,
-)
-if res.returncode == 0:
-    err('Error: The string "DO NOT COMMIT" was found!')
-    err(res.stdout.decode("utf-8"))
-    sys.exit(1)
-elif res.returncode == 2:
-    err(f"Error invoking grep on {', '.join(sys.argv[1:])}:")
-    err(res.stderr.decode("utf-8"))
-    sys.exit(2)
